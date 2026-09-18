@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<title>三角比計算機 | sin・cos・tan</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#667085;--accent:#2563eb;--border:#dfe5ee;--soft:#eef4ff}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:var(--bg);color:var(--text)}
+header{background:#0f172a;color:white;padding:28px 18px 24px;text-align:center}
+header h1{margin:0;font-size:26px}header p{margin:7px 0 0;color:#cbd5e1;font-size:14px}
+main{max-width:900px;margin:auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 5px 18px #0f172a0b}
+label{font-weight:700;font-size:14px}.inputrow{display:flex;gap:10px;margin-top:9px}
+input,select,button{font:inherit}input,select{width:100%;border:1px solid var(--border);border-radius:12px;padding:13px 14px;background:white;color:var(--text)}
+button{border:0;border-radius:12px;padding:12px 15px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff}
+button.secondary{background:#eef2f7;color:#273244}.quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.quick button{padding:8px 11px;background:var(--soft);color:#1d4ed8}
+.results{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.result{border:1px solid var(--border);border-radius:16px;padding:16px}.name{font-weight:800;font-size:18px}.value{font-size:25px;font-weight:800;margin:8px 0;word-break:break-all}.formula{font-size:12px;color:var(--muted)}
+.copy{width:100%;background:#f1f5f9;color:#334155;padding:8px;margin-top:7px}
+.error{color:#b42318;font-weight:700;margin-top:10px}.hint{font-size:13px;color:var(--muted);line-height:1.7}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.history{display:flex;flex-wrap:wrap;gap:8px}.history button{background:#f1f5f9;color:#334155}
+@media(max-width:650px){.results{grid-template-columns:1fr}.two{grid-template-columns:1fr}.inputrow{align-items:stretch}.inputrow button{min-width:92px}}
+</style>
+</head>
+<body>
+<header><h1>📐 三角比計算機</h1><p>サイン・コサイン・タンジェントをまとめて計算</p></header>
+<main>
+<section class="card">
+  <div class="two">
+    <div>
+      <label for="angle">角度</label>
+      <div class="inputrow">
+        <input id="angle" type="number" step="any" value="30" placeholder="例：30">
+        <select id="unit" aria-label="角度の単位"><option value="deg">度（°）</option><option value="rad">ラジアン</option></select>
+      </div>
+    </div>
+    <div>
+      <label for="digits">小数点以下</label>
+      <div class="inputrow"><select id="digits">
+        <option>3</option><option>4</option><option selected>6</option><option>8</option><option>10</option>
+      </select><button id="reset" class="secondary">リセット</button></div>
+    </div>
+  </div>
+  <div class="quick">
+    <button data-a="0">0°</button><button data-a="30">30°</button><button data-a="45">45°</button>
+    <button data-a="60">60°</button><button data-a="90">90°</button><button data-a="120">120°</button>
+    <button data-a="180">180°</button><button data-a="270">270°</button><button data-a="360">360°</button>
+  </div>
+  <div id="error" class="error"></div>
+  <div class="results">
+    <div class="result"><div class="name">sin θ</div><div id="sin" class="value">-</div><div class="formula">対辺 ÷ 斜辺</div><button class="copy" data-copy="sin">コピー</button></div>
+    <div class="result"><div class="name">cos θ</div><div id="cos" class="value">-</div><div class="formula">隣辺 ÷ 斜辺</div><button class="copy" data-copy="cos">コピー</button></div>
+    <div class="result"><div class="name">tan θ</div><div id="tan" class="value">-</div><div class="formula">対辺 ÷ 隣辺</div><button class="copy" data-copy="tan">コピー</button></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2 style="margin:0 0 8px">🔁 逆三角関数</h2>
+  <p class="hint">sin⁻¹・cos⁻¹・tan⁻¹から角度を求めます。入力範囲はそれぞれ数学的に有効な範囲に限定しています。</p>
+  <div class="two">
+    <div><label>値</label><input id="invVal" type="number" step="any" value="0.5" style="margin-top:9px"></div>
+    <div><label>関数</label><select id="invFn" style="margin-top:9px"><option value="asin">sin⁻¹</option><option value="acos">cos⁻¹</option><option value="atan">tan⁻¹</option></select></div>
+  </div>
+  <div class="result" style="margin-top:14px"><div class="name">答え</div><div id="invResult" class="value">30°</div></div>
+</section>
+
+<section class="card">
+  <h2 style="margin:0 0 8px">🧠 覚え方</h2>
+  <div class="hint">
+    <b>sin</b> = 対辺 ÷ 斜辺　｜　<b>cos</b> = 隣辺 ÷ 斜辺　｜　<b>tan</b> = 対辺 ÷ 隣辺<br>
+    SOH・CAH・TOA：<b>S</b>ine=<b>O</b>pposite/<b>H</b>ypotenuse、<b>C</b>osine=<b>A</b>djoining/<b>H</b>ypotenuse、<b>T</b>angent=<b>O</b>pposite/<b>A</b>djoining
+  </div>
+</section>
+
+<section class="card">
+  <h2 style="margin:0 0 8px">🕘 計算履歴</h2>
+  <div id="history" class="history"><span class="hint">まだありません</span></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let last={sin:"",cos:"",tan:""};
+let history=[];
+function clean(x){return Math.abs(x)<1e-12?0:x}
+function fmt(x){if(!Number.isFinite(x))return "定義されません";let d=+$("digits").value;return Number(clean(x).toFixed(d)).toString()}
+function calc(){
+  const a=Number($("angle").value), unit=$("unit").value;
+  $("error").textContent="";
+  if(!Number.isFinite(a)){["sin","cos","tan"].forEach(k=>$(k).textContent="-");return}
+  const r=unit==="deg"?a*Math.PI/180:a;
+  const s=clean(Math.sin(r)), c=clean(Math.cos(r));
+  const t=Math.abs(c)<1e-12?Infinity:clean(Math.tan(r));
+  last={sin:fmt(s),cos:fmt(c),tan:fmt(t)};
+  $("sin").textContent=last.sin;$("cos").textContent=last.cos;$("tan").textContent=last.tan;
+  addHistory(a,unit);
+}
+function addHistory(a,unit){
+  const label=unit==="deg"?`${a}°`:a;
+  const key=unit+":"+a;
+  history=history.filter(x=>x.key!==key);history.unshift({key,label});
+  history=history.slice(0,8);
+  $("history").innerHTML=history.map(x=>`<button data-hist="${x.key}">${x.label}</button>`).join("");
+  document.querySelectorAll("[data-hist]").forEach(b=>b.onclick=()=>{const [u,a]=b.dataset.hist.split(":");$("unit").value=u;$("angle").value=a;calc()});
+}
+function invCalc(){
+  const v=Number($("invVal").value), fn=$("invFn").value;
+  let valid=Number.isFinite(v)&&(fn==="atan"||Math.abs(v)<=1);
+  $("invResult").textContent=valid?fmt((Math[fn](v)*180/Math.PI))+"°":"入力範囲外";
+}
+$("angle").addEventListener("input",calc);$("unit").addEventListener("change",calc);$("digits").addEventListener("change",calc);
+$("invVal").addEventListener("input",invCalc);$("invFn").addEventListener("change",invCalc);
+$("reset").onclick=()=>{$("angle").value=30;$("unit").value="deg";$("digits").value=6;calc()};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("unit").value="deg";$("angle").value=b.dataset.a;calc()});
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const k=b.dataset.copy;await navigator.clipboard.writeText(last[k]);b.textContent="コピーしました ✓";setTimeout(()=>b.textContent="コピー",900)});
+calc();invCalc();
+</script>
+</body>
+</html>
